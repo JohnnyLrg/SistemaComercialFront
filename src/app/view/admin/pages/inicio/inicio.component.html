@@ -1,105 +1,189 @@
-<div class=" mt-5">
-    <h2 class="text-center mb-4">¡Bienvenido al Sistema Comercial!</h2>
-  
-    <div class="row mb-4">
-      <div class="col-md-12 text-center">
-        <button class="btn btn-outline-secondary mx-2" [routerLink]="'/Empresa/perfil'">Perfil</button>
-        <button class="btn btn-outline-secondary mx-2" [routerLink]="'/Empresa/consultas'" >Consultas</button>
-        <button class="btn btn-outline-secondary mx-2" [routerLink]="'/Empresa/clientes'" >Clientes</button>
-        <button class="btn btn-outline-secondary mx-2" [routerLink]="'/Empresa/page2'" >Inventario</button>
-      </div>
+<div class="mt-5">
+  <h2 class="text-center mb-4">¡Bienvenido al Sistema Comercial!</h2>
+
+  <!-- Botones de navegación rápida -->
+  <div class="row mb-4">
+    <div class="col-md-12 text-center">
+      <button class="btn btn-outline-secondary mx-2" [routerLink]="'/Empresa/perfil'">Perfil</button>
+      <button class="btn btn-outline-secondary mx-2" [routerLink]="'/Empresa/clientes'">Clientes</button>
+      <button class="btn btn-outline-secondary mx-2" [routerLink]="'/Empresa/page2'">Inventario</button>
+      <button class="btn btn-outline-secondary mx-2" [routerLink]="'/Empresa/dashboard-config'">Configuración</button>
     </div>
-  
-    <div class="row">
-      <div class="col-md-8 mb-4">
-        <div class="card shadow-sm h-100">
-          <div class="card-header text-white d-flex justify-content-between align-items-center" style="background-color: #0e2238;">
-            <h5 class="mb-0">Total de Órdenes</h5>
-            <i class="bi bi-bar-chart"></i>
-          </div>
-          <div class="card-body">
-            <canvas baseChart [data]="ventasData" [options]="ventasOptions" chartType="bar" width="400" height="90"></canvas>
-          </div>
-        </div>
-      </div>
-  
-      <!-- <div class="col-md-4 mb-4">
-        <div class="card shadow-sm h-100">
-          <div class="card-header text-white d-flex justify-content-between align-items-center" style="background-color: #0e2238;">
-            <h5 class="mb-0">Resumen de Inventario</h5>
-            <i class="bi bi-box-seam"></i>
-          </div>
-          <div class="card-body">
-            <ul class="list-group">
-              <li class="list-group-item" *ngFor="let producto of productosMasVendidos">
-                {{ producto.ProductoNombre }} - {{ producto.CantidadVendida }}
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div> -->
-  
-      <div class="col-md-4 mb-4">
-        <div class="card shadow-sm h-100">
-          <div class="card-header text-white d-flex justify-content-between align-items-center" style="background-color: #0e2238;">
-            <h5 class="mb-0">Productos Tendencia</h5>
-            <i class="bi bi-star"></i>
-          </div>
-          <div class="card-body">
-            <ul class="list-group">
-              <li class="list-group-item" *ngFor="let producto of productosMasVendidos">
-                {{ producto.ProductoNombre }} - {{ producto.CantidadVendida }}
-              </li>
-            </ul>
+  </div>
+
+  <!-- Cards de estadísticas generales -->
+  <div class="row mb-4" *ngIf="estadisticasGenerales">
+    <div class="col-md-3 mb-3">
+      <div class="card text-white bg-success">
+        <div class="card-body">
+          <div class="d-flex justify-content-between">
+            <div>
+              <h6 class="card-title">Pedidos Entregados</h6>
+              <h2 class="card-text">{{ estadisticasGenerales.pedidosEntregados }}</h2>
+            </div>
+            <div class="align-self-center">
+              <i class="fas fa-check-circle fa-2x"></i>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  
-    <div class="row">
-      <div class="col-md-8 mb-4">
-        <div class="card shadow-sm h-100">
-          <div class="card-header text-white d-flex justify-content-between align-items-center" style="background-color: #0e2238;">
-            <h5 class="mb-0">Vista de Empleados</h5>
-            <i class="bi bi-people"></i>
-          </div>
-          <div class="card-body">
-            <table class="table table-hover">
-              <thead>
-                <tr style="background-color: #0e2238; color: white;">
-                  <th>ID</th>
-                  <th>Empleado</th>
-                  <th>Email</th>
-                  <th>Cargo</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let empleado of ultimosEmpleados">
-                  <td>{{ empleado.EmpleadoCodigo }}</td>
-                  <td>{{ empleado.Empleadonombre }} {{ empleado.Empleadoapellidos }}</td>
-                  <td>{{ empleado.Empleadoemail }}</td>
-                  <td>{{ empleado.Cargo }}</td>
-                </tr>
-              </tbody>
-            </table>
+
+    <div class="col-md-3 mb-3">
+      <div class="card text-white bg-warning">
+        <div class="card-body">
+          <div class="d-flex justify-content-between">
+            <div>
+              <h6 class="card-title">Pedidos Pendientes</h6>
+              <h2 class="card-text">{{ estadisticasGenerales.pedidosPendientes }}</h2>
+            </div>
+            <div class="align-self-center">
+              <i class="fas fa-clock fa-2x"></i>
+            </div>
           </div>
         </div>
       </div>
-  
-      <div class="col-md-4 mb-4">
-        <div class="card shadow-sm h-100">
-          <div class="card-header text-white d-flex justify-content-between align-items-center" style="background-color: #0e2238;">
-            <h5 class="mb-0">Nuevos Empleados</h5>
-            <i class="bi bi-person-plus"></i>
+    </div>
+
+    <div class="col-md-3 mb-3">
+      <div class="card text-white bg-danger">
+        <div class="card-body">
+          <div class="d-flex justify-content-between">
+            <div>
+              <h6 class="card-title">Pedidos Cancelados</h6>
+              <h2 class="card-text">{{ estadisticasGenerales.pedidosCancelados }}</h2>
+            </div>
+            <div class="align-self-center">
+              <i class="fas fa-times-circle fa-2x"></i>
+            </div>
           </div>
-          <div class="card-body">
-            <ul class="list-group">
-              <li class="list-group-item" *ngFor="let empleado of ultimosEmpleados">
-                {{ empleado.Empleadonombre }} {{ empleado.Empleadoapellidos }}
-              </li>
-            </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3 mb-3">
+      <div class="card text-white bg-info">
+        <div class="card-body">
+          <div class="d-flex justify-content-between">
+            <div>
+              <h6 class="card-title">Total Ganancias</h6>
+              <h4 class="card-text">S/ {{ estadisticasGenerales.totalMontoEntregado | number:'1.2-2' }}</h4>
+            </div>
+            <div class="align-self-center">
+              <i class="fas fa-dollar-sign fa-2x"></i>
+            </div>
           </div>
         </div>
       </div>
     </div>
   </div>
+
+  <!-- Gráficos -->
+  <div class="row mb-4">
+    <!-- Productos más vendidos -->
+    <div class="col-md-6 mb-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-header text-white d-flex justify-content-between align-items-center" style="background-color: #0e2238;">
+          <h5 class="mb-0">Productos Más Vendidos</h5>
+          <i class="fas fa-chart-bar"></i>
+        </div>
+        <div class="card-body">
+          <canvas baseChart 
+                  [data]="ventasData" 
+                  [options]="ventasOptions" 
+                  chartType="bar" 
+                  width="400" 
+                  height="200">
+          </canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Productos con más ganancias -->
+    <div class="col-md-6 mb-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-header text-white d-flex justify-content-between align-items-center" style="background-color: #0e2238;">
+          <h5 class="mb-0">Ganancias por Producto</h5>
+          <i class="fas fa-money-bill-wave"></i>
+        </div>
+        <div class="card-body">
+          <canvas baseChart 
+                  [data]="gananciasData" 
+                  [options]="ventasOptions" 
+                  chartType="bar" 
+                  width="400" 
+                  height="200">
+          </canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Estados de pedidos y empleados -->
+  <div class="row mb-4">
+    <!-- Gráfico de estados -->
+    <div class="col-md-4 mb-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-header text-white d-flex justify-content-between align-items-center" style="background-color: #0e2238;">
+          <h5 class="mb-0">Estados de Pedidos</h5>
+          <i class="fas fa-chart-pie"></i>
+        </div>
+        <div class="card-body">
+          <canvas baseChart 
+                  [data]="estadosData" 
+                  [options]="estadosOptions" 
+                  chartType="doughnut" 
+                  width="300" 
+                  height="200">
+          </canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lista de productos más vendidos -->
+    <div class="col-md-4 mb-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-header text-white d-flex justify-content-between align-items-center" style="background-color: #0e2238;">
+          <h5 class="mb-0">Top Productos</h5>
+          <i class="fas fa-star"></i>
+        </div>
+        <div class="card-body">
+          <div class="list-group list-group-flush" *ngIf="productosMasVendidos.length > 0; else noProductos">
+            <div class="list-group-item d-flex justify-content-between align-items-center" 
+                 *ngFor="let producto of productosMasVendidos; let i = index">
+              <div>
+                <h6 class="mb-1">{{ producto.ProductoNombre }}</h6>
+                <small class="text-muted">{{ producto.CantidadVendida }} vendidos</small>
+              </div>
+              <span class="badge bg-primary rounded-pill">{{ i + 1 }}</span>
+            </div>
+          </div>
+          <ng-template #noProductos>
+            <p class="text-muted text-center">No hay datos de ventas aún</p>
+          </ng-template>
+        </div>
+      </div>
+    </div>
+
+    <!-- Vista de empleados -->
+    <div class="col-md-4 mb-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-header text-white d-flex justify-content-between align-items-center" style="background-color: #0e2238;">
+          <h5 class="mb-0">Últimos Empleados</h5>
+          <i class="fas fa-users"></i>
+        </div>
+        <div class="card-body">
+          <div class="list-group list-group-flush" *ngIf="ultimosEmpleados.length > 0; else noEmpleados">
+            <div class="list-group-item" *ngFor="let empleado of ultimosEmpleados">
+              <h6 class="mb-1">{{ empleado.Empleadonombre }} {{ empleado.Empleadoapellidos }}</h6>
+              <small class="text-muted">{{ empleado.Cargo }}</small>
+            </div>
+          </div>
+          <ng-template #noEmpleados>
+            <p class="text-muted text-center">No hay empleados registrados</p>
+          </ng-template>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

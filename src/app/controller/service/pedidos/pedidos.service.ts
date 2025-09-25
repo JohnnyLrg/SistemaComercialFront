@@ -32,4 +32,9 @@ export class PedidosService {
   obtenerFormasPago(): Observable<any[]> {
     return this.http.get<any[]>(`${BASE_URL}/formas-pago/listar`);
   }
+
+  // Método para obtener todos los detalles de pedidos (necesario para estadísticas)
+  obtenerTodosLosDetalles(): Observable<any[]> {
+    return this.http.get<any[]>(`${BASE_URL}/pedido/detallesPedidos`);
+  }
 }
