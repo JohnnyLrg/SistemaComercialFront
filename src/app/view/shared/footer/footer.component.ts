@@ -27,7 +27,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
       </div>
 
       <div class="text-center">
-        Sistema Comercial Copyright © 2024 - Derechos reservados || Grupo 1 ing. sofware
+        Sistema Comercial Copyright © 2025 - Derechos reservados || Grupo 6 Calidad de Software
       </div>
     </div>
   </footer>`,

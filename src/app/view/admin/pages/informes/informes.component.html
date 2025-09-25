@@ -39,7 +39,7 @@
                   <tr *ngFor="let producto of productosBajoStock">
                     <td>{{ producto.ProductoCodigo }}</td>
                     <td>{{ producto.ProductoNombre }}</td>
-                    <td>{{ producto.ProductoPrecio }}</td>
+                    <td>S/ {{ producto.ProductoPrecio }}</td>
                     <td>{{ producto.ProductoCantidad }}</td>
                   </tr>
                 </tbody>
@@ -67,7 +67,7 @@
                 <tbody>
                   <tr *ngFor="let venta of ventasPorCliente">
                     <td>{{ venta.ClienteNombre }} {{ venta.ClienteApellidos }}</td>
-                    <td>{{ venta.TotalGastado | currency }}</td>
+                    <td>S/ {{ venta.TotalGastado }}</td>
                   </tr>
                 </tbody>
               </table>

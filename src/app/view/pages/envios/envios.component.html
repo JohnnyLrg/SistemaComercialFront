@@ -61,7 +61,7 @@
                     </tr>
                     <tr>
                         <th>Total</th>
-                        <td>{{ pedido.Pedidototal | currency }}</td>
+                        <td>S/ {{ pedido.Pedidototal }}</td>
                     </tr>
                     <tr>
                         <th>Estado</th>
@@ -85,7 +85,7 @@
                         <td>{{ detalle.ProductoNombre }}</td>
                         <td>{{ detalle.ProductoDescripcion }}</td>
                         <td>{{ detalle.DetallePedidoCantidad }}</td>
-                        <td>{{ detalle.DetallePedidoSubtotal | currency }}</td>
+                        <td>S/ {{ detalle.DetallePedidoSubtotal }}</td>
                     </tr>
                 </tbody>
             </table>

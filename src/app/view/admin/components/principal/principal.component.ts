@@ -65,7 +65,8 @@ export default class PrincipalComponent implements OnInit {
     'las la-users',
     'las la-edit',
     'las la-user-friends',
-    'las la-chart-line'
+    'las la-chart-line',
+    'las la-cog'
   ];
 
   public combinedMenuItems: any[] = [];

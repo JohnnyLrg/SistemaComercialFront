@@ -23,7 +23,7 @@
                                 <p class="card-text mb-1"><strong>Dirección:</strong> {{ cliente.ClienteDireccion }}</p>
                                 <p class="card-text mb-1"><strong>Email:</strong> {{ cliente.ClienteEmail }}</p>
                                 <p class="card-text mb-1"><strong>Teléfono:</strong> {{ cliente.ClienteTelefono }}</p>
-                                <p class="card-text mb-1"><strong>Compras totales:</strong> {{ cliente.TotalCompras }}</p>
+                                <p class="card-text mb-1"><strong>Compras totales:</strong> S/ {{ cliente.TotalCompras }}</p>
                             </div>
                             <div class="card-footer text-muted">
                                 Cliente desde: {{ formatFecha(cliente.ClienteFecha) }}
@@ -51,7 +51,7 @@
                         <p>Cantidad de pedidos: {{selectedCliente.CantidadPedidos || 'Sin datos'}}</p>
                         <p>Categorías Compradas: {{selectedCliente.CategoriasMasCompradas || 'Sin datos'}}</p>
                         <p>Productos Comprados: {{selectedCliente.ProductosComprados || 'Sin datos'}}</p>
-                        <p>Total de compras: ${{selectedCliente.TotalCompras || 0}}</p>
+                        <p>Total de compras: S/{{selectedCliente.TotalCompras || 0}}</p>
                     }
                 </div>
             </div>

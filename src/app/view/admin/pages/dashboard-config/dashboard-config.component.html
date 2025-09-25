@@ -1,0 +1,222 @@
+<div class="dashboard-config-container">
+  <div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h4 class="mb-0">
+        <i class="fas fa-cog me-2"></i>
+        Configuración del Dashboard
+      </h4>
+      <small class="text-muted">Almacenado: {{ getStorageInfo() }}</small>
+    </div>
+
+    <div class="card-body">
+      <!-- Mensajes de éxito y error -->
+      @if (successMessage()) {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+          <i class="fas fa-check-circle me-2"></i>
+          {{ successMessage() }}
+        </div>
+      }
+
+      @if (errorMessage()) {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+          <i class="fas fa-exclamation-triangle me-2"></i>
+          {{ errorMessage() }}
+        </div>
+      }
+
+      <form [formGroup]="configForm" (ngSubmit)="onSaveConfig()">
+        <div class="row">
+          <!-- Columna izquierda: Formulario -->
+          <div class="col-md-8">
+            <!-- Título -->
+            <div class="mb-3">
+              <label for="titulo" class="form-label">
+                <i class="fas fa-heading me-1"></i>
+                Título Principal *
+              </label>
+              <input 
+                type="text" 
+                class="form-control"
+                [class.is-invalid]="hasError('titulo')"
+                id="titulo" 
+                formControlName="titulo"
+                placeholder="Ingresa el título principal del dashboard">
+              @if (hasError('titulo')) {
+                <div class="invalid-feedback">
+                  {{ getErrorMessage('titulo') }}
+                </div>
+              }
+            </div>
+
+            <!-- Descripción -->
+            <div class="mb-3">
+              <label for="descripcion" class="form-label">
+                <i class="fas fa-align-left me-1"></i>
+                Descripción *
+              </label>
+              <textarea 
+                class="form-control"
+                [class.is-invalid]="hasError('descripcion')"
+                id="descripcion" 
+                formControlName="descripcion"
+                rows="3"
+                placeholder="Escribe una descripción atractiva para el dashboard"></textarea>
+              @if (hasError('descripcion')) {
+                <div class="invalid-feedback">
+                  {{ getErrorMessage('descripcion') }}
+                </div>
+              }
+            </div>
+
+            <!-- Texto del botón -->
+            <div class="mb-3">
+              <label for="textBoton" class="form-label">
+                <i class="fas fa-mouse-pointer me-1"></i>
+                Texto del Botón *
+              </label>
+              <input 
+                type="text" 
+                class="form-control"
+                [class.is-invalid]="hasError('textBoton')"
+                id="textBoton" 
+                formControlName="textBoton"
+                placeholder="Texto que aparecerá en el botón">
+              @if (hasError('textBoton')) {
+                <div class="invalid-feedback">
+                  {{ getErrorMessage('textBoton') }}
+                </div>
+              }
+            </div>
+
+            <!-- Upload de imagen -->
+            <div class="mb-4">
+              <label for="imagenPrincipal" class="form-label">
+                <i class="fas fa-image me-1"></i>
+                Imagen Principal
+              </label>
+              <input 
+                type="file" 
+                class="form-control"
+                id="imagenPrincipal" 
+                (change)="onImageSelect($event)"
+                accept="image/*">
+              <div class="form-text">
+                <i class="fas fa-info-circle me-1"></i>
+                Formatos soportados: JPG, PNG, GIF. Tamaño máximo: 5MB
+              </div>
+            </div>
+          </div>
+
+          <!-- Columna derecha: Preview -->
+          <div class="col-md-4">
+            <div class="preview-section">
+              <h6 class="text-muted mb-3">
+                <i class="fas fa-eye me-1"></i>
+                Vista Previa
+              </h6>
+              
+              <!-- Preview de la imagen -->
+              <div class="image-preview-container mb-3">
+                @if (imagePreview()) {
+                  <img 
+                    [src]="imagePreview()!" 
+                    alt="Preview" 
+                    class="img-fluid rounded shadow-sm"
+                    style="max-height: 200px; width: 100%; object-fit: contain;">
+                } @else {
+                  <div class="no-image-placeholder">
+                    <i class="fas fa-image fa-3x text-muted"></i>
+                    <p class="text-muted mt-2">Sin imagen</p>
+                  </div>
+                }
+              </div>
+
+              <!-- Preview del contenido -->
+              <div class="content-preview border rounded p-3 bg-light">
+                <h6 class="text-primary fw-bold">{{ configForm.get('titulo')?.value || 'Título' }}</h6>
+                <p class="small text-muted mb-2">{{ configForm.get('descripcion')?.value || 'Descripción' }}</p>
+                <button type="button" class="btn btn-sm btn-primary" disabled>
+                  {{ configForm.get('textBoton')?.value || 'Botón' }}
+                </button>
+              </div>
+
+              <!-- Botón para resetear imagen -->
+              @if (currentConfig().imagenPrincipal !== currentConfig().imagenPrincipalOriginal) {
+                <button 
+                  type="button" 
+                  class="btn btn-outline-warning btn-sm mt-2 w-100"
+                  (click)="onResetImage()">
+                  <i class="fas fa-undo me-1"></i>
+                  Restaurar Imagen Original
+                </button>
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- Botones de acción -->
+        <hr>
+        <div class="d-flex justify-content-between align-items-center">
+          <button 
+            type="button" 
+            class="btn btn-outline-secondary"
+            (click)="onResetToDefault()"
+            [disabled]="isLoading()">
+            <i class="fas fa-refresh me-1"></i>
+            Restaurar Todo por Defecto
+          </button>
+          
+          <div>
+            <button 
+              type="submit" 
+              class="btn btn-primary"
+              [disabled]="configForm.invalid || isLoading()">
+              @if (isLoading()) {
+                <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                Guardando...
+              } @else {
+                <i class="fas fa-save me-1"></i>
+                Guardar Configuración
+              }
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Información adicional -->
+  <div class="card mt-4">
+    <div class="card-header">
+      <h6 class="mb-0">
+        <i class="fas fa-info-circle me-2"></i>
+        Información
+      </h6>
+    </div>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-6">
+          <h6>Estado de Personalización:</h6>
+          @if (dashboardConfigService.hasCustomConfig()) {
+            <span class="badge bg-warning">
+              <i class="fas fa-edit me-1"></i>
+              Personalizado
+            </span>
+          } @else {
+            <span class="badge bg-success">
+              <i class="fas fa-check me-1"></i>
+              Por Defecto
+            </span>
+          }
+        </div>
+        <div class="col-md-6">
+          <h6>Configuración Actual:</h6>
+          <ul class="list-unstyled small">
+            <li><strong>Título:</strong> {{ currentConfig().titulo }}</li>
+            <li><strong>Botón:</strong> {{ currentConfig().textBoton }}</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

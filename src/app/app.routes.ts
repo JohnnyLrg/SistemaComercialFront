@@ -28,6 +28,7 @@ export const routes: Routes = [
             {path: 'historial', loadComponent:() => import('./view/admin/pages/Historial/Historial.component'), title: 'Historial' },
             {path: 'trabajadores', loadComponent: () => import ('./view/admin/pages/trabajadores/trabajadores.component'), title: 'Trabajadores' },
             {path: 'informes', loadComponent: () => import ('./view/admin/pages/informes/informes.component') , title: 'Informes' },
+            {path: 'dashboard-config', loadComponent: () => import('./view/admin/pages/dashboard-config/dashboard-config.component'), title: 'Configuración Dashboard' },
             { path: '', redirectTo: '/Empresa/home', pathMatch: 'full' },
             { path: '**', redirectTo: '/Empresa/home', pathMatch: 'full' }
         ]
