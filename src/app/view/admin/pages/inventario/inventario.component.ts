@@ -43,7 +43,7 @@ export default class InventarioComponent implements OnInit {
 
   productosFiltrados: Inventario[] = [];
   filterProperty: string = '';
-  estadoActual: string = 'V'; // Estado actual del filtro: 'V' para Vigentes, 'D' para Descontinuados
+  estadoActual: string = 'V'; // Estado actual del filtro: 'V' para Vigentes, 'D' para Agotados
 
   alertMessage: string | null = null;
   constructor(
@@ -73,7 +73,7 @@ export default class InventarioComponent implements OnInit {
       ProductoNombre: ['', [Validators.required, Validators.minLength(3)]],
       ProductoDescripcion: ['', Validators.required],
       ProductoPrecio: [0, [Validators.required, Validators.min(1)]],
-      ProductoCantidad: [0, [Validators.required, Validators.min(0)]], // Permite 0 para agotado
+      ProductoCantidad: [1, [Validators.required, Validators.min(1)]], // Mínimo 1, no permite 0
       Producto_TipoProductoCodigo: [0, Validators.required],
       ProductoFoto: [null],
     });
@@ -85,22 +85,24 @@ export default class InventarioComponent implements OnInit {
     this.cargarCategorias();
   }
 
-  onFileChange(event: any) {
-    const file = event.target.files[0];
-  if (file) {
-    const reader = new FileReader();
-    reader.onload = () => {
-      this.currentImage = reader.result as string;
-    };
-    reader.readAsDataURL(file);
-  }
-  this.productForm.patchValue({
-    image: file,
-  });
+  onFileChange(event: Event) {
+    const target = event.target as HTMLInputElement;
+    const file = target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.currentImage = reader.result as string;
+      };
+      reader.readAsDataURL(file);
+    }
+    this.productForm.patchValue({
+      image: file,
+    });
   }
 
-  onEditFileChange(event: any) {
-    const file = event.target.files[0];
+  onEditFileChange(event: Event) {
+    const target = event.target as HTMLInputElement;
+    const file = target.files?.[0];
     if (file) {
       // Validar tipo de archivo
       if (!file.type.startsWith('image/')) {
@@ -213,6 +215,16 @@ export default class InventarioComponent implements OnInit {
   }
 
   onSubmit(): void {
+    // Validar que la cantidad no sea 0
+    const cantidad = this.productForm.get('ProductoCantidad')?.value;
+    if (cantidad === 0 || cantidad === '0') {
+      this.snackBar.open('No se puede colocar valores 0', 'Cerrar', {
+        duration: 3000,
+        horizontalPosition: 'end',
+        panelClass: ['error-snackbar']
+      });
+      return;
+    }
 
     if (this.productForm.invalid) {
       this.snackBar.open('Por favor complete todos los campos requeridos correctamente.', 'Cerrar', {
@@ -244,22 +256,25 @@ export default class InventarioComponent implements OnInit {
 
   onEditSubmit(): void {
     if (this.selectedProduct && this.editProductForm.valid) {
+      // Validar que la cantidad no sea 0
+      const cantidad = this.editProductForm.get('ProductoCantidad')?.value;
+      if (cantidad === 0 || cantidad === '0') {
+        this.snackBar.open('No se puede colocar valores 0', 'Cerrar', {
+          duration: 3000,
+          horizontalPosition: 'end',
+          panelClass: ['error-snackbar']
+        });
+        return;
+      }
+
       const formData = new FormData();
       
       // Agregar todos los campos del formulario al FormData
       formData.append('ProductoNombre', this.editProductForm.get('ProductoNombre')?.value);
       formData.append('ProductoDescripcion', this.editProductForm.get('ProductoDescripcion')?.value);
       formData.append('ProductoPrecio', this.editProductForm.get('ProductoPrecio')?.value);
-      
-      // Lógica especial para ProductoCantidad: 0 = Agotado (null), >0 = Vigente
-      const cantidad = this.editProductForm.get('ProductoCantidad')?.value;
-      if (cantidad === 0 || cantidad === '0') {
-        formData.append('ProductoCantidad', 'null'); // Marca como agotado
-        console.log('📦 Producto marcado como AGOTADO (cantidad = null)');
-      } else {
-        formData.append('ProductoCantidad', cantidad.toString()); // Vigente
-        console.log(`📦 Producto marcado como VIGENTE (cantidad = ${cantidad})`);
-      }
+      formData.append('ProductoCantidad', cantidad.toString());
+      console.log(`📦 Producto editado con cantidad = ${cantidad}`);
       
       formData.append('Producto_TipoProductoCodigo', this.editProductForm.get('Producto_TipoProductoCodigo')?.value);
       
@@ -326,7 +341,7 @@ export default class InventarioComponent implements OnInit {
     return categoria ? categoria.TipoProductoCodigo : 0;
   }
 
-  filtrarProductos() {
+  filtrarProductos(): void {
     if (!this.filterProperty.trim()) {
       // Si no hay filtro de búsqueda, cargar todos los productos del estado actual
       this.cargarProductosPorEstado(this.estadoActual);

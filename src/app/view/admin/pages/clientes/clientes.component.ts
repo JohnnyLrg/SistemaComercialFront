@@ -1,11 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { MostrarClientes } from '../../../../model/interface/cliente-info';
 import { ClientesService } from '../../../../controller/service/clientes.service';
 import { ClienteInfo } from '../../../../model/interface/cliente-info';
 import { ClienteInfoService } from '../../../../controller/service/pedidos/clienteInfo.service';
 import { ProductosService } from '../../../../controller/service/productos.service';
+import { InventarioService } from '../../../../controller/service/inventario/inventario-fixed.service';
+import { Categoria } from '../../../../model/interface/inventario';
 import EnviosComponent from '../../../pages/envios/envios.component';
 
 @Component({
@@ -16,7 +18,7 @@ import EnviosComponent from '../../../pages/envios/envios.component';
   styleUrl: './clientes.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export default class ClientesComponent {
+export default class ClientesComponent implements OnInit {
 
   public clientes: MostrarClientes[] = [];
   public selectedCliente: MostrarClientes | null = null;
@@ -27,6 +29,9 @@ export default class ClientesComponent {
   clienteBuscado: ClienteInfo | null = null;
   mensajeBusqueda: string = '';
   cargandoEstadisticas: boolean = false;
+  
+  // Categorías obtenidas de la base de datos
+  private categoriasDB: Categoria[] = [];
 
   activarBuscarClienteDni(){
     this.mostrarBuscarCliente = !this.mostrarBuscarCliente;
@@ -35,10 +40,25 @@ export default class ClientesComponent {
   private clienteInfoService = inject (ClienteInfoService);
   private clientesService = inject(ClientesService);
   private productosService = inject(ProductosService);
+  private inventarioService = inject(InventarioService);
   cdr = inject(ChangeDetectorRef);
   
   ngOnInit(): void {
     this.listarClientes();
+    this.cargarCategorias();
+  }
+
+  // Cargar categorías reales de la base de datos
+  cargarCategorias(): void {
+    this.inventarioService.obtenerCategorias().subscribe({
+      next: (categorias) => {
+        this.categoriasDB = categorias;
+        console.log('📂 Categorías cargadas desde BD:', this.categoriasDB);
+      },
+      error: (error) => {
+        console.error('Error al cargar categorías:', error);
+      }
+    });
   }
 
   listarClientes() {
@@ -179,10 +199,13 @@ export default class ClientesComponent {
           cliente.CantidadPedidos = clienteCompleto.Pedidos.length;
           cliente.TotalCompras = clienteCompleto.Pedidos.reduce((total, pedido) => total + pedido.Pedidototal, 0);
           
-          // Cargar productos con sus categorías reales desde la base de datos
-          this.productosService.cargarProductos().subscribe({
+          // Cargar TODOS los productos (vigentes y agotados) para análisis histórico
+          this.inventarioService.cargarInventarioAdmin().subscribe({
             next: (productos) => {
-              console.log('📦 Productos cargados para análisis de categorías:', productos);
+              console.log('📦 Inventario completo cargado para análisis histórico:');
+              console.log(`   - Total productos: ${productos.length}`);
+              console.log(`   - Vigentes: ${productos.filter(p => p.ProductoEstado === 'V').length}`);
+              console.log(`   - Agotados: ${productos.filter(p => p.ProductoEstado === 'D').length}`);
               
               const productosUnicos = new Set<string>();
               const categoriasUnicas = new Set<string>();
@@ -192,21 +215,21 @@ export default class ClientesComponent {
                   pedido.Detalles.forEach(detalle => {
                     productosUnicos.add(detalle.ProductoNombre);
                     
-                    // Buscar el producto en el catálogo para obtener su categoría real
+                    // Buscar el producto en TODO el inventario (vigente y agotado)
                     const producto = productos.find(p => 
                       p.ProductoNombre.toLowerCase().trim() === detalle.ProductoNombre.toLowerCase().trim()
                     );
                     
-                    if (producto && producto.Producto_TipoProductoCodigo) {
-                      // Obtener la categoría real desde TipoProducto
-                      const categoriaReal = this.obtenerCategoriaRealDesdeProducto(producto);
-                      console.log(`📂 Categoría real para "${detalle.ProductoNombre}": ${categoriaReal}`);
+                    if (producto) {
+                      // Usar la categoría que viene directamente del inventario
+                      const categoriaReal = producto.CategoriaNombre || this.mapearCodigoCategoria(producto.Producto_TipoProductoCodigo);
+                      console.log(`📂 Categoría histórica para "${detalle.ProductoNombre}": ${categoriaReal} (Estado: ${producto.ProductoEstado})`);
                       categoriasUnicas.add(categoriaReal);
                     } else {
-                      console.log(`⚠️ Producto "${detalle.ProductoNombre}" no encontrado en catálogo actual`);
-                      // Fallback: usar inferencia por nombre solo si no se encuentra en BD
+                      console.log(`⚠️ Producto "${detalle.ProductoNombre}" no encontrado en inventario completo`);
+                      // Último fallback: usar inferencia por nombre
                       const categoriaInferida = this.inferirCategoriaDelNombre(detalle.ProductoNombre);
-                      categoriasUnicas.add(categoriaInferida + ' (Agotado)');
+                      categoriasUnicas.add(categoriaInferida);
                     }
                   });
                 }
@@ -273,34 +296,54 @@ export default class ClientesComponent {
     return this.inferirCategoriaDelNombre(producto.ProductoNombre);
   }
 
-  // Método para mapear códigos de categoría a nombres (necesario si solo tenemos el código)
+  // Método para mapear códigos de categoría a nombres usando datos reales de BD
   mapearCodigoCategoria(codigo: number | string): string {
-    // Este mapeo debería basarse en los datos reales de tu tabla TipoProducto
-    const mapeo: { [key: string]: string } = {
-      '1': 'Lácteos',
-      '2': 'Bebidas',
-      '3': 'Snacks',
-      '4': 'Cuidado Personal',
-      '5': 'Cereales y Pastas',
-      // Agregar más mapeos según tu base de datos
-    };
+    const codigoNum = Number(codigo);
+    const categoria = this.categoriasDB.find(cat => cat.TipoProductoCodigo === codigoNum);
     
-    const codigoStr = String(codigo);
-    return mapeo[codigoStr] || `Categoría ${codigo}`;
+    if (categoria) {
+      return categoria.TipoProductoNombre;
+    }
+    
+    // Fallback si no se encuentra la categoría
+    console.warn(`⚠️ Categoría con código ${codigo} no encontrada en BD`);
+    return `Categoría ${codigo}`;
   }
 
-  // Método simple para inferir categoría del producto por nombre (solo fallback)
+  // Método de fallback para inferir categoría cuando no se puede obtener de BD
   inferirCategoriaDelNombre(nombreProducto: string): string {
     const nombre = nombreProducto.toLowerCase().trim();
     
-    if (nombre.includes('leche') || nombre.includes('milk')) return 'Leches';
-    if (nombre.includes('queso') || nombre.includes('cheese')) return 'Quesos';
-    if (nombre.includes('yogur') || nombre.includes('yogurt')) return 'Yogures';
-    if (nombre.includes('galleta') || nombre.includes('oreo')) return 'Galletas y Snacks';
-    if (nombre.includes('bebida') || nombre.includes('inka') || nombre.includes('coca')) return 'Bebidas';
-    if (nombre.includes('shampoo') || nombre.includes('sedal')) return 'Cuidado Personal';
-    if (nombre.includes('pasta') || nombre.includes('espag') || nombre.includes('fideo')) return 'Pastas y Cereales';
+    // Intentar buscar coincidencias con las categorías reales de la BD
+    for (const categoria of this.categoriasDB) {
+      const categoriaNombre = categoria.TipoProductoNombre.toLowerCase();
+      
+      // Buscar palabras clave que puedan asociarse con la categoría
+      if (nombre.includes(categoriaNombre) || 
+          this.contienePalabrasClave(nombre, categoriaNombre)) {
+        return categoria.TipoProductoNombre;
+      }
+    }
     
-    return 'Otros Productos';
+    // Si no se encuentra ninguna coincidencia, usar categoría genérica
+    console.warn(`⚠️ No se pudo determinar categoría para producto: ${nombreProducto}`);
+    return 'Sin Categoría';
+  }
+
+  // Método auxiliar para buscar palabras clave relacionadas
+  private contienePalabrasClave(nombreProducto: string, categoriaNombre: string): boolean {
+    // Mapeo básico de palabras clave comunes
+    const palabrasClave: { [key: string]: string[] } = {
+      'lacteos': ['leche', 'milk', 'queso', 'cheese', 'yogur', 'yogurt', 'mantequilla'],
+      'bebidas': ['bebida', 'juice', 'jugo', 'agua', 'refresco', 'gaseosa', 'coca', 'inka'],
+      'snacks': ['galleta', 'oreo', 'chips', 'papas', 'dulce', 'chocolate'],
+      'limpieza': ['detergente', 'jabon', 'shampoo', 'limpia'],
+      'cereales': ['pasta', 'espagueti', 'fideo', 'arroz', 'avena', 'cereal']
+    };
+    
+    const categoriaKey = categoriaNombre.toLowerCase();
+    const palabras = palabrasClave[categoriaKey] || [];
+    
+    return palabras.some(palabra => nombreProducto.includes(palabra));
   }
 }

@@ -21,7 +21,7 @@
           [class.btn-danger]="estadoActual === 'D'"
           [class.btn-outline-danger]="estadoActual !== 'D'"
           (click)="cambiarEstado('D')">
-          🚫 Productos Descontinuados
+          🚫 Productos Agotados
         </button>
       </div>
     </div>
@@ -112,7 +112,13 @@
           </div>
           <div class="mb-3">
             <label for="productQuantity" class="form-label">Cantidad</label>
-            <input type="number" id="productQuantity" class="form-control" formControlName="ProductoCantidad">
+            <input type="number" id="productQuantity" class="form-control" 
+                   formControlName="ProductoCantidad" min="1"
+                   [class.is-invalid]="productForm.get('ProductoCantidad')?.invalid && productForm.get('ProductoCantidad')?.touched">
+            <div *ngIf="productForm.get('ProductoCantidad')?.invalid && productForm.get('ProductoCantidad')?.touched" 
+                 class="invalid-feedback">
+              No se puede colocar valores 0. La cantidad mínima es 1.
+            </div>
           </div>
           <div class="mb-3">
             <label for="productCategory" class="form-label">Categoría</label>
@@ -145,7 +151,7 @@
       </div>
       <div class="modal-body">
         <!-- Formulario para agregar categoria -->
-        <form [formGroup]="categoriaForm" (ngSubmit)=" agregarNuevaCategoria()">
+        <form [formGroup]="categoriaForm" (ngSubmit)="agregarNuevaCategoria()">
           <div class="mb-3">
             <label for="CategoriaNombre" class="form-label">Nombre</label>
             <input type="text" id="CategoriaNombre" class="form-control" formControlName="TipoProductoNombre">
@@ -186,7 +192,13 @@
           </div>
           <div class="mb-3">
             <label for="editProductQuantity" class="form-label">Cantidad</label>
-            <input type="number" id="editProductQuantity" class="form-control" formControlName="ProductoCantidad">
+            <input type="number" id="editProductQuantity" class="form-control" 
+                   formControlName="ProductoCantidad" min="1"
+                   [class.is-invalid]="editProductForm.get('ProductoCantidad')?.invalid && editProductForm.get('ProductoCantidad')?.touched">
+            <div *ngIf="editProductForm.get('ProductoCantidad')?.invalid && editProductForm.get('ProductoCantidad')?.touched" 
+                 class="invalid-feedback">
+              No se puede colocar valores 0. La cantidad mínima es 1.
+            </div>
           </div>
           <div class="mb-3">
             <label for="editProductCategory" class="form-label">Categoría</label>
