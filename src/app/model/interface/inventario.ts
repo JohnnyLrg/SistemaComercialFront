@@ -10,13 +10,16 @@ export interface Inventario {
   CategoriaNombre: string; // Nombre de la categoría que viene del backend
   Producto_TipoProductoCodigo: number;
 }export interface InventoryHistory {
+  HistorialId: number;
   ProductoCodigo: number;
-  ProductoNombre: string;
+  ProductoNombre?: string; // Opcional, puede venir del join con la tabla Productos
   CampoModificado: string;
   ValorAnterior: string;
   ValorNuevo: string;
   FechaCambio: string;
-  TipoCambio: number;
+  TipoCambio: string; // 'Creacion' o 'Actualizacion'
+  EmpleadoCodigo?: number; // Puede ser NULL
+  EmpleadoNombre?: string; // Opcional, puede venir del join con la tabla Empleado
 }
 
 export interface Categoria {

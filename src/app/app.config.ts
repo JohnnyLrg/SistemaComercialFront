@@ -1,5 +1,7 @@
-import { ApplicationConfig, importProvidersFrom } from '@angular/core';
+import { ApplicationConfig, importProvidersFrom, LOCALE_ID } from '@angular/core';
 import { provideRouter } from '@angular/router';
+import { registerLocaleData } from '@angular/common';
+import localeEs from '@angular/common/locales/es-PE';
 
 import { routes } from './app.routes';
 import { HttpClientModule, provideHttpClient } from '@angular/common/http';
@@ -20,10 +22,13 @@ export const employeeFirebaseConfig = {
   appId: "1:151722857160:web:a33bf76de3b343ed36cbfd"
 };
 
+// Registrar la localización de Perú
+registerLocaleData(localeEs);
+
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes),
-
+    { provide: LOCALE_ID, useValue: 'es-PE' },
     importProvidersFrom(HttpClientModule),
     // Firebase para empleados/administradores (configuración principal)
     provideFirebaseApp(() => initializeApp(employeeFirebaseConfig)),

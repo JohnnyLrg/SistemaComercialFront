@@ -100,28 +100,40 @@
         <table class="table table-striped table-bordered">
           <thead class="thead-dark">
             <tr>
-              <th scope="col">Codigo Producto</th>
+              <th scope="col">ID Historial</th>
+              <th scope="col">Código Producto</th>
               <th scope="col">Nombre Producto</th>
               <th scope="col">Campo Modificado</th>
               <th scope="col">Valor Anterior</th>
               <th scope="col">Valor Nuevo</th>
-
-              <th scope="col">Cambios</th>
-              <th scope="col">Fecha</th>
+              <th scope="col">Tipo de Cambio</th>
+              <th scope="col">Fecha Cambio</th>
+              <th scope="col">Empleado</th>
             </tr>
           </thead>
           <tbody>
             @for (his of historial; track $index) {
-
             <ng-container>
               <tr>
+                <td>{{his.HistorialId}}</td>
                 <td>{{his.ProductoCodigo}}</td>
-                <td>{{his.ProductoNombre}}</td>
+                <td>{{his.ProductoNombre || 'N/A'}}</td>
                 <td>{{his.CampoModificado}}</td>
                 <td>{{his.ValorAnterior}}</td>
                 <td>{{his.ValorNuevo}}</td>
-                <td>{{his.TipoCambio}}</td>
-                <td>{{his.FechaCambio}}</td>
+                <td>
+                  <span class="badge" 
+                        [ngClass]="{
+                          'badge-success': his.TipoCambio === 'Creacion',
+                          'badge-info': his.TipoCambio === 'Actualizacion'
+                        }">
+                    {{his.TipoCambio}}
+                  </span>
+                </td>
+                <td>{{his.FechaCambio | date:'dd/MM/yyyy'}}</td>
+                <td>
+                  <strong>{{his.EmpleadoNombre || 'Sistema'}}</strong>
+                </td>
               </tr>
             </ng-container>
             }
